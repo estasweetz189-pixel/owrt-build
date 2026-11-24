@@ -26,4 +26,17 @@ git clone --depth=1 --single-branch --branch main \
 find "$FWX_PKG" -maxdepth 1 -type d -name 'luci-app-fwx-*' -exec cp -rf {} ./package/ \;
 rm -rf "$FWX_PKG"
 
+# 3) 内核补丁：struct nf_conn 增加 fwx_data（fwx.ko 强依赖，上游内核没有）
+PATCH_SRC="$GITHUB_WORKSPACE/Scripts/patches/fwx/950-fwx-nf-conn-struct-user-hook.patch"
+if [ -f "$PATCH_SRC" ]; then
+  for d in ./target/linux/generic/hack-6.*/; do
+    [ -d "$d" ] || continue
+    cp -f "$PATCH_SRC" "${d}950-fwx-nf-conn-struct-user-hook.patch"
+    echo "Kernel patch installed: ${d}"
+  done
+else
+  echo "ERROR: fwx kernel patch missing"
+  exit 1
+fi
+
 echo "PRIVATE.sh: FanchmWrt packages copied."
