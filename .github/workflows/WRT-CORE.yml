@@ -44,6 +44,10 @@ on:
         required: false
         default: false
         type: boolean
+      WRT_FLAVOR:
+        required: false
+        default: ''
+        type: string
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -59,6 +63,7 @@ env:
   WRT_SOURCE: ${{inputs.WRT_SOURCE}}
   WRT_PACKAGE: ${{inputs.WRT_PACKAGE}}
   WRT_TEST: ${{inputs.WRT_TEST}}
+  WRT_FLAVOR: ${{inputs.WRT_FLAVOR}}
 
 jobs:
   core:
@@ -109,7 +114,7 @@ jobs:
           WRT_WIFI=$(grep -oE 'WIFI-(YES|NO)$' <<< "${WRT_CONFIG^^}" || true); WRT_WIFI=${WRT_WIFI:-none}
 
           {
-            echo "WRT_INFO=${WRT_SOURCE%%/*}"
+            echo "WRT_INFO=${WRT_FLAVOR:-${WRT_SOURCE%%/*}}"
             echo "WRT_MARK=${GITHUB_REPOSITORY%%/*}"
             echo "WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d-%H.%M.%S")"
             echo "WRT_CACHE_PREFIX=$WRT_CACHE_PREFIX"
@@ -287,11 +292,26 @@ jobs:
           tag_name: ${{env.WRT_CONFIG}}-${{env.WRT_INFO}}-${{env.WRT_BRANCH}}-${{env.WRT_DATE}}
           files: ./wrt/upload/*.*
           body: |
-            这是个平台固件包，内含多个设备！
-            请注意选择你需要的设备固件！
-            不要问，刷就完事了！
+            **S20P 定制固件 · VIKINGYFY 源码 + FanchmWrt 界面**
 
-            全系带开源硬件加速，别问了！
+            平台：mediatek-filogic（MT7986）｜配置：MEDIATEK-WIFI-NO（无 WiFi）
+            设备：Super Gateway S20P
+
+            **本次精简**
+            - 科学上网只保留 OpenClash，内置 Meta(mihomo) 内核，刷完不用再下内核
+            - 已删除：Samba 网络共享、磁盘管理、分区扩容、UPnP、网络唤醒、游戏加速、内网穿透、定时重启、homeproxy、axonhub
+            - 已删除存储类内核模块：btrfs / ksmbd / NVMe / SATA / USB 存储等
+
+            **保留功能**
+            - FanchmWrt 界面：主题、应用中心、流量统计、终端管理、应用过滤
+            - OpenClash 分流（nftables / TProxy）
+            - 软件流量卸载，硬件加速正常
+            - 默认管理地址 192.168.5.1，刷完直接可用
+
+            登录地址：${{env.WRT_IP}}
+            登录密码：${{env.WRT_PW}}
+            主机名：${{env.WRT_NAME}}
+            内核版本：${{env.WRT_KVER}}
 
             源码：${{env.WRT_REPO}}
             分支：${{env.WRT_BRANCH}}
@@ -299,15 +319,6 @@ jobs:
 
             配置：${{env.WRT_CONFIG}}
             平台：${{env.WRT_TARGET}}
-
-            登录地址：${{env.WRT_IP}}
-            登录密码：${{env.WRT_PW}}
-
-            WIFI名称：${{env.WRT_SSID}}
-            WIFI密码：${{env.WRT_WORD}}
-
-            内核版本：${{env.WRT_KVER}}
-            插件列表：${{env.WRT_LIST}}
 
   cache-rollover:
     name: Roll cache generations

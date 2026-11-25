@@ -70,3 +70,5 @@ jobs:
       WRT_PACKAGE: ${{inputs.PACKAGE}}
       #仅输出配置文件
       WRT_TEST: ${{inputs.TEST || false}}
+      #固件命名标识（源码 VIKINGYFY + 界面 FanchmWrt）
+      WRT_FLAVOR: VIKINGYFY-FanchmWrt
