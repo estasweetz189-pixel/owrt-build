@@ -23,6 +23,10 @@ on:
         default: false
         required: false
         type: boolean
+  #触发文件：改 BUILD-NOW 即编译
+  push:
+    paths:
+      - 'BUILD-NOW'
 
 #CI权限
 permissions: write-all
